@@ -44,6 +44,7 @@ import java.awt.event.*;
 import java.io.Serializable;
 
 public class DynamicGraphs extends JApplet {
+	private static final long serialVersionUID = 1L;
 	GraphView graphView;
 	JTextField jtfName = new JTextField();
 	JTextField jtfWeight = new JTextField();
@@ -224,6 +225,7 @@ public class DynamicGraphs extends JApplet {
 	}
 
 	public class GraphView extends JPanel {
+		private static final long serialVersionUID = 1L;
 		private java.util.List<Integer> path;
 		private WeightedGraph<? extends Displayable> graph;
 
@@ -309,23 +311,6 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 	// Priority adjacency lists
 	private List<PriorityQueue<WeightedEdge>> queues;
 
-	/** Construct a WeightedGraph from edges and vertices in arrays */
-	public WeightedGraph(int[][] edges, V[] vertices) {
-		super(edges, vertices);
-		createQueues(edges, vertices.length);
-	}
-
-	/** Construct a WeightedGraph from edges and vertices in List */
-	public WeightedGraph(int[][] edges, int numberOfVertices) {
-		super(edges, numberOfVertices);
-		createQueues(edges, numberOfVertices);
-	}
-
-	/** Construct a WeightedGraph for vertices 0, 1, 2 and edge list */
-	public WeightedGraph(List<WeightedEdge> edges, List<V> vertices) {
-		super((List) edges, vertices);
-		createQueues(edges, vertices.size());
-	}
 
 	/** Construct a WeightedGraph from vertices 0, 1, and edge array */
 	public WeightedGraph(List<WeightedEdge> edges, int numberOfVertices) {
@@ -333,21 +318,6 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 		createQueues(edges, numberOfVertices);
 	}
 
-	/** Create priority adjacency lists from edge arrays */
-	private void createQueues(int[][] edges, int numberOfVertices) {
-		queues = new ArrayList<PriorityQueue<WeightedEdge>>();
-		for (int i = 0; i < numberOfVertices; i++) {
-			queues.add(new PriorityQueue<WeightedEdge>()); // Create a queue
-		}
-
-		for (int i = 0; i < edges.length; i++) {
-			int u = edges[i][0];
-			int v = edges[i][1];
-			int weight = edges[i][2];
-			// Insert an edge into the queue
-			queues.get(u).offer(new WeightedEdge(u, v, weight));
-		}
-	}
 
 	/** Create priority adjacency lists from edge lists */
 	private void createQueues(List<WeightedEdge> edges, int numberOfVertices) {
@@ -359,74 +329,6 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 		for (WeightedEdge edge : edges) {
 			queues.get(edge.u).offer(edge); // Insert an edge into the queue
 		}
-	}
-
-	/** Display edges with weights */
-	public void printWeightedEdges() {
-		for (int i = 0; i < queues.size(); i++) {
-			System.out.print("Vertex " + i + ": ");
-			for (WeightedEdge edge : queues.get(i)) {
-				System.out.print("(" + edge.u + ", " + edge.v + ", "
-						+ edge.weight + ") ");
-			}
-			System.out.println();
-		}
-	}
-
-	/** Get a minimum spanning tree rooted at vertex 0 */
-	public MST getMinimumSpanningTree() {
-		return getMinimumSpanningTree(0);
-	}
-
-	/** Get a minimum spanning tree rooted at a specified vertex */
-	public MST getMinimumSpanningTree(int startingIndex) {
-		List<Integer> T = new ArrayList<Integer>();
-		// T initially contains the startingVertex;
-		T.add(startingIndex);
-
-		int numberOfVertices = vertices.size(); // Number of vertices
-		int[] parent = new int[numberOfVertices]; // Parent of a vertex
-		// Initially set the parent of all vertices to -1
-		for (int i = 0; i < parent.length; i++)
-			parent[i] = -1;
-		int totalWeight = 0; // Total weight of the tree thus far
-
-		// Clone the priority queue, so to keep the original queue intact
-		List<PriorityQueue<WeightedEdge>> queues = deepClone(this.queues);
-
-		// All vertices are found?
-		while (T.size() < numberOfVertices) {
-			// Search for the vertex with the smallest edge adjacent to
-			// a vertex in T
-			int v = -1;
-			double smallestWeight = Double.MAX_VALUE;
-			for (int u : T) {
-				while (!queues.get(u).isEmpty()
-						&& T.contains(queues.get(u).peek().v)) {
-					// Remove the edge from queues[u] if the adjacent
-					// vertex of u is already in T
-					queues.get(u).remove();
-				}
-
-				if (queues.get(u).isEmpty()) {
-					continue; // Consider the next vertex in T
-				}
-
-				// Current smallest weight on an edge adjacent to u
-				WeightedEdge edge = queues.get(u).peek();
-				if (edge.weight < smallestWeight) {
-					v = edge.v;
-					smallestWeight = edge.weight;
-					// If v is added to the tree, u will be its parent
-					parent[v] = u;
-				}
-			} // End of for
-
-			T.add(v); // Add a new vertex to the tree
-			totalWeight += smallestWeight;
-		} // End of while
-
-		return new MST(startingIndex, parent, T, totalWeight);
 	}
 
 	/** Clone an array of queues */
@@ -446,6 +348,7 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 
 	/** MST is an inner class in WeightedGraph */
 	public class MST extends Tree {
+		private static final long serialVersionUID = 1L;
 		private int totalWeight; // Total weight of all edges in the tree
 
 		public MST(int root, int[] parent, List<Integer> searchOrder,
@@ -519,6 +422,7 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 
 	/** ShortestPathTree is an inner class in WeightedGraph */
 	public class ShortestPathTree extends Tree {
+		private static final long serialVersionUID = 1L;
 		private int[] costs; // costs[v] is the cost from v to source
 
 		/** Construct a path */
@@ -533,15 +437,6 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 			return costs[v];
 		}
 
-		/** Print paths from all vertices to the source */
-		public void printAllPaths() {
-			System.out.println("All shortest paths from "
-					+ vertices.get(getRoot()) + " are:");
-			for (int i = 0; i < costs.length; i++) {
-				printPath(i); // Print a path from i to the source
-				System.out.println("(cost: " + costs[i] + ")"); // Path cost
-			}
-		}
 	}
 
 	public List<PriorityQueue<WeightedEdge>> getWeightedEdges() {
@@ -558,75 +453,10 @@ class WeightedGraph<V> extends AbstractGraph<V> {
 		queues.get(u).add(new WeightedEdge(u, v, weight));
 		queues.get(v).add(new WeightedEdge(v, u, weight));
 	}
-
-	public List<Integer> getShortestHamiltonianCycle() {
-		int minDistance = Integer.MAX_VALUE;
-		List<Integer> shortestPath = null;
-		for (int i = 0; i < vertices.size(); i++) {
-			List<Integer> path = new ArrayList<Integer>();
-			Integer weight = getShortestHamiltonianCycleWeight(i, path,
-					new boolean[vertices.size()], i, 0, queues);
-			if (weight != null) {
-				if (weight < minDistance) {
-					minDistance = weight;
-					shortestPath = path;
-				}
-			}
-		}
-		return shortestPath;
-	}
-
-	/**
-	 * return the shortest Hamiltonian cycle from specified index. Returns null
-	 * is such path does not exist
-	 * 
-	 * @param index
-	 * @return List<Integer>
-	 */
-	public List<Integer> getShortestHamiltonianCycleFromIndex(int index) {
-		List<Integer> path = new ArrayList<Integer>();
-		getShortestHamiltonianCycleWeight(index, path,
-				new boolean[vertices.size()], index, 0, queues);
-		return path;
-	}
-
-	protected Integer getShortestHamiltonianCycleWeight(int v,
-			List<Integer> path, boolean[] isVisited, int endIndex,
-			int totalWeight, List<PriorityQueue<WeightedEdge>> list) {
-		isVisited[v] = true; // Mark vertex v visited
-
-		if (allVisited(isVisited)) {
-			if (neighbors.get(v).contains(endIndex)) {
-				path.add(v);
-				return totalWeight;
-			}
-		}
-
-		for (WeightedEdge edge : list.get(v)) {
-			if (!isVisited[edge.v]
-					&& getShortestHamiltonianCycleWeight(edge.v, path,
-							isVisited, endIndex, totalWeight, list) != null) {
-				path.add(0, v);
-				return totalWeight + edge.weight;
-			}
-		}
-
-		isVisited[v] = false; // Backtrack, v is marked unvisited now
-		return null;
-	}
-
-	/** Return true if all elements in array isVisited are true */
-	private boolean allVisited(boolean[] isVisited) {
-		boolean result = true;
-
-		for (int i = 0; i < getSize(); i++)
-			result = result && isVisited[i];
-
-		return result;
-	}
 }
 
 abstract class AbstractGraph<V> implements Graph<V> {
+	private static final long serialVersionUID = 1L;
 	protected List<V> vertices; // Store vertices
 	protected List<List<Integer>> neighbors; // Adjacency lists
 
@@ -839,6 +669,7 @@ abstract class AbstractGraph<V> implements Graph<V> {
 	/** Tree inner class inside the AbstractGraph class */
 	/** To be discussed in Section 27.5 */
 	public class Tree implements Serializable {
+		private static final long serialVersionUID = 1L;
 		private int root; // The root of the tree
 		private int[] parent; // Store the parent of each vertex
 		private List<Integer> searchOrders; // Store the search order
@@ -905,235 +736,14 @@ abstract class AbstractGraph<V> implements Graph<V> {
 			return path;
 		}
 
-		/** Print a path from the root to vertex v */
-		public void printPath(int index) {
-			List<V> path = getPath(index);
-			System.out.print("A path from " + vertices.get(root) + " to "
-					+ vertices.get(index) + ": ");
-			for (int i = path.size() - 1; i >= 0; i--)
-				System.out.print(path.get(i) + " ");
-		}
-
-		/** Print the whole tree */
-		public void printTree() {
-			System.out.println("Root is: " + vertices.get(root));
-			System.out.print("Edges: ");
-			for (int i = 0; i < parent.length; i++) {
-				if (parent[i] != -1) {
-					// Display an edge
-					System.out.print("(" + vertices.get(parent[i]) + ", "
-							+ vertices.get(i) + ") ");
-				}
-			}
-			System.out.println();
-		}
-
-		/** returns depth of vertex index v in the tree */
-		public int depth(int v) {
-			int depth = 0;
-			int parent = getParent(v);
-			while (true) {
-				if (parent != -1) {
-					depth++;
-					parent = getParent(parent);
-				} else
-					return depth;
-			}
-
-		}
+	
+		
 	}
 
-	/**
-	 * Return a Hamiltonian path from the specified vertex object Return null if
-	 * the graph does not contain a Hamiltonian path
-	 */
-	public List<Integer> getHamiltonianPath(V vertex) {
-		return getHamiltonianPath(getIndex(vertex));
-	}
 
-	/**
-	 * Return a Hamiltonian path from the specified vertex label Return null if
-	 * the graph does not contain a Hamiltonian path
-	 */
-	public List<Integer> getHamiltonianPath(int v) {
-		// A path starts from v. (i, next[i]) represents an edge in
-		// the path. isVisited[i] tracks whether i is currently in the
-		// path.
-		int[] next = new int[getSize()];
-		for (int i = 0; i < next.length; i++)
-			next[i] = -1; // Indicate no subpath from i is found yet
 
-		boolean[] isVisited = new boolean[getSize()];
 
-		// The vertices in the Hamiltionian path are stored in result
-		List<Integer> result = null;
 
-		// To speed up search, reorder the adjacency list for each
-		// vertex so that the vertices in the list are in increasing
-		// order of their degrees
-		for (int i = 0; i < getSize(); i++)
-			reorderNeigborsBasedOnDegree(neighbors.get(i));
-
-		if (getHamiltonianPath(v, next, isVisited)) {
-			result = new ArrayList<Integer>(); // Create a list for path
-			int vertex = v; // Starting from v
-			while (vertex != -1) {
-				result.add(vertex); // Add vertex to the result list
-				vertex = next[vertex]; // Get the next vertex in the path
-			}
-		}
-
-		return result; // return null if no Hamiltionian path is found
-	}
-
-	/** Reorder the adjacency list in increasing order of degrees */
-	private void reorderNeigborsBasedOnDegree(List<Integer> list) {
-		for (int i = list.size() - 1; i >= 1; i--) {
-			// Find the maximum in the list[0..i]
-			int currentMaxDegree = getDegree(list.get(0));
-			int currentMaxIndex = 0;
-
-			for (int j = 1; j <= i; j++) {
-				if (currentMaxDegree < getDegree(list.get(j))) {
-					currentMaxDegree = getDegree(list.get(j));
-					currentMaxIndex = j;
-				}
-			}
-
-			// Swap list[i] with list[currentMaxIndex] if necessary;
-			if (currentMaxIndex != i) {
-				int temp = list.get(currentMaxIndex);
-				list.set(currentMaxIndex, list.get(i));
-				list.set(i, temp);
-			}
-		}
-	}
-
-	/** Return true if all elements in array isVisited are true */
-	private boolean allVisited(boolean[] isVisited) {
-		boolean result = true;
-
-		for (int i = 0; i < getSize(); i++)
-			result = result && isVisited[i];
-
-		return result;
-	}
-
-	/** Search for a Hamiltonian path from v */
-	private boolean getHamiltonianPath(int v, int[] next, boolean[] isVisited) {
-		isVisited[v] = true; // Mark vertex v visited
-
-		if (allVisited(isVisited))
-			return true; // The path now includes all vertices, thus found
-
-		for (int i = 0; i < neighbors.get(v).size(); i++) {
-			int u = neighbors.get(v).get(i);
-			if (!isVisited[u] && getHamiltonianPath(u, next, isVisited)) {
-				next[v] = u; // Edge (v, u) is in the path
-				return true;
-			}
-		}
-
-		isVisited[v] = false; // Backtrack, v is marked unvisited now
-		return false; // No Hamiltonian path exists from vertex v
-	}
-
-	/**
-	 * return Hamiltonian cycle. Return null if the graph contains no
-	 * Hamiltonian cycle
-	 * 
-	 * @param vertex
-	 *            is starting edge in Hamiltonian cycle
-	 */
-	public List<Integer> getHamiltonianCycle() {
-		// To speed up search, reorder the adjacency list for each
-		// vertex so that the vertices in the list are in increasing
-		// order of their degrees
-		for (int i = 0; i < getSize(); i++)
-			reorderNeigborsBasedOnDegree(neighbors.get(i));
-
-		for (int i = 0; i < vertices.size(); i++) {
-			List<Integer> path = new ArrayList<Integer>();
-			if (getHamiltonianCycle(i, path, new boolean[vertices.size()], i) != null)
-				return path;
-		}
-		return null;
-	}
-
-	/**
-	 * return Hamiltonian cycle from specified index. Returns null is such path
-	 * does not exist
-	 * 
-	 * @param index
-	 * @return List<Integer>
-	 */
-	public List<Integer> getHamiltonianCycleFromIndex(int index) {
-		// To speed up search, reorder the adjacency list for each
-		// vertex so that the vertices in the list are in increasing
-		// order of their degrees
-		for (int i = 0; i < getSize(); i++)
-			reorderNeigborsBasedOnDegree(neighbors.get(i));
-
-		return getHamiltonianCycle(index, new ArrayList<Integer>(),
-				new boolean[vertices.size()], index);
-	}
-
-	protected List<Integer> getHamiltonianCycle(int v, List<Integer> path,
-			boolean[] isVisited, int endIndex) {
-		isVisited[v] = true; // Mark vertex v visited
-
-		if (allVisited(isVisited)) {
-			if (neighbors.get(v).contains(endIndex)) {
-				path.add(v);
-				return path;
-			}
-		}
-
-		// reordering neighBors
-		List<Integer> list = neighbors.get(v);
-		for (int i = list.size() - 1; i >= 1; i--) {
-			// Find the maximum in the list[0..i]
-			int currentMaxDegree = getAvailableDegree(isVisited, list.get(0));
-			int currentMaxIndex = 0;
-
-			for (int j = 1; j <= i; j++) {
-				int jAvailable = getAvailableDegree(isVisited, list.get(j));
-				if (currentMaxDegree < jAvailable) {
-					currentMaxDegree = jAvailable;
-					currentMaxIndex = j;
-				}
-			}
-
-			// Swap list[i] with list[currentMaxIndex] if necessary;
-			if (currentMaxIndex != i) {
-				int temp = list.get(currentMaxIndex);
-				list.set(currentMaxIndex, list.get(i));
-				list.set(i, temp);
-			}
-		}
-
-		for (int i = 0; i < neighbors.get(v).size(); i++) {
-			int u = neighbors.get(v).get(i);
-			if (!isVisited[u]
-					&& getHamiltonianCycle(u, path, isVisited, endIndex) != null) {
-				path.add(0, v);
-				return path;
-			}
-		}
-
-		isVisited[v] = false; // Backtrack, v is marked unvisited now
-		return null;
-	}
-
-	private int getAvailableDegree(boolean[] isVisited, int vertex) {
-		int allDegree = getDegree(vertex);
-		List<Integer> neib = neighbors.get(vertex);
-		for (int i = 0; i < neib.size(); i++) {
-			if (isVisited[neib.get(i)])
-				allDegree--;
-		}
-		return allDegree;
-	}
 
 	public void addVertex(V vertex) {
 		vertices.add(vertex);
@@ -1144,255 +754,11 @@ abstract class AbstractGraph<V> implements Graph<V> {
 		neighbors.get(u).add(v);
 		neighbors.get(v).add(u);
 	}
-
-	// find all connected components in a graph
-	public List<List<Integer>> getConnectedComponent() {
-		List<List<Integer>> components = new ArrayList<List<Integer>>();
-		List<Integer> left = new LinkedList<Integer>();
-		for (int i = 0; i < vertices.size(); i++)
-			left.add(i);
-		while (!left.isEmpty()) {
-			if (left.size() == 1) {
-				List<Integer> component = new ArrayList<Integer>();
-				component.add(left.remove(0));
-				components.add(component);
-				break;
-			}
-
-			Tree tree = dfs(left.get(0));
-			List<Integer> treeElements = tree.getSearchOrders();
-			components.add(treeElements);
-			for (int element : treeElements) {
-				left.remove(new Integer(element));
-			}
-		}
-		return components;
-	}
-
-	/**
-	 * find path between two vertices, if path does not exist or if parameters
-	 * is incorrect method returns null
-	 */
-	public List<Integer> getPath(int u, int v) {
-		Tree tree = bfs(v);
-		if (!tree.getSearchOrders().contains(u) || u >= vertices.size()
-				|| u < 0 || v >= vertices.size() || v < 0)
-			return null;
-		List<Integer> path = new ArrayList<Integer>();
-		do {
-			path.add(u);
-			u = tree.getParent(u);
-		} while (u != -1);
-		return path;
-	}
-
-	/** determines whether there is a cycle is in a graph */
-	public boolean isCyclic() {
-		boolean[] visited = new boolean[getSize()];
-		List<List<Integer>> components = getConnectedComponent();
-		for (List<Integer> component : components) {
-			if (hasCycle(component.get(0), -1, visited))
-				return true;
-		}
-		return false;
-	}
-
-	/** recursive method for isCyclic() */
-	private boolean hasCycle(int index, int parent, boolean[] visited) {
-		visited[index] = true;
-		List<Integer> neighbors = getNeighbors(index);
-		for (int neighbor : neighbors) {
-			if (neighbor == parent)
-				continue;
-			if (visited[neighbor])
-				return true;
-			if (hasCycle(neighbor, index, visited))
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * return cycle from graph. if cycle not exist return null p.s method is
-	 * wrong
-	 */
-	public List<Integer> getCycle() {
-		List<List<Integer>> components = getConnectedComponent();
-
-		for (List<Integer> component : components) {
-			boolean cyclic = true;
-			for (int element : component) {
-				if (getNeighbors(element).size() != 2) {
-					cyclic = false;
-					break;
-				}
-			}
-			if (cyclic) {
-				return component;
-			}
-		}
-		return null;
-	}
-
-	/** detect is graph is bipartite */
-	public boolean isBipartite() {
-		List<Integer> list1 = new ArrayList<Integer>();
-		List<Integer> list2 = new ArrayList<Integer>();
-		for (int i = 0; i < vertices.size(); i++) {
-			if (!hasEdges(i, list1))
-				list1.add(i);
-			else if (!hasEdges(i, list2))
-				list2.add(i);
-			else
-				return false;
-		}
-		return true;
-	}
-
-	/** return true if vertex n has any neighbors in a list */
-	protected boolean hasEdges(int n, List<Integer> list) {
-		List<Integer> neighbors = getNeighbors(n);
-		for (int neighbor : neighbors) {
-			for (int element : list) {
-				if (neighbor == element)
-					return true;
-				List<Integer> elementNeighbors = getNeighbors(element);
-				for (int i = 0; i < elementNeighbors.size(); i++) {
-					if (elementNeighbors.get(i) == n)
-						return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/** return two bipartite sets. If graph is not bipartite return null */
-	public List<List<Integer>> getBipartite() {
-		List<Integer> list1 = new ArrayList<Integer>();
-		List<Integer> list2 = new ArrayList<Integer>();
-		for (int i = 0; i < vertices.size(); i++) {
-			if (!hasEdges(i, list1))
-				list1.add(i);
-			else if (!hasEdges(i, list2))
-				list2.add(i);
-			else
-				return null;
-		}
-		List<List<Integer>> list = new ArrayList<List<Integer>>();
-		list.add(list1);
-		list.add(list2);
-		return list;
-	}
-
-	/** add a vertex to the graph and returns true if succeeded */
-	public boolean add(V vertex) {
-		if (vertices.contains(vertex))
-			return false;
-		vertices.add(vertex);
-		neighbors.add(new ArrayList<Integer>());
-		return true;
-	}
-
-	/** Remove vertex from the graph and return true if succeeded */
-	public boolean remove(V vertex) {
-		if (!vertices.contains(vertex))
-			return false;
-		if (vertices.size() == 1) {
-			vertices.clear();
-			neighbors.clear();
-			return true;
-		}
-
-		int vertexIndex = vertices.indexOf(vertex);
-		int lastIndex = vertices.size() - 1;
-
-		if (vertexIndex == lastIndex) {
-			vertices.remove(vertexIndex);
-			neighbors.remove(lastIndex);
-			for (List<Integer> v : neighbors) {
-				v.remove(new Integer(vertexIndex));
-			}
-			return true;
-		}
-
-		vertices.set(vertexIndex, vertices.remove(lastIndex));
-		neighbors.set(vertexIndex, neighbors.remove(lastIndex));
-		for (List<Integer> v : neighbors) {
-			v.remove(new Integer(vertexIndex));
-			int indexOfLastIndex = v.indexOf(lastIndex);
-			if (indexOfLastIndex != -1)
-				v.set(v.indexOf(lastIndex), vertexIndex);
-		}
-		return true;
-	}
-
-	/** Add an edge to the graph and return true if secceded */
-	public boolean add(Edge edge) {
-		if (vertices.size() == 0 || edge.u < 0 || edge.v < 0
-				|| edge.u >= vertices.size() || edge.v >= vertices.size()
-				|| neighbors.get(edge.u).contains(edge.v))
-			return false;
-		neighbors.get(edge.u).add(edge.v);
-		return true;
-	}
-
-	/** Remove an edge from the graph and return true if succeeded */
-	public boolean remove(Edge edge) {
-		if (vertices.size() == 0 || edge.u < 0 || edge.v < 0
-				|| edge.u >= vertices.size() || edge.v >= vertices.size()
-				|| !neighbors.get(edge.u).contains(edge.v))
-			return false;
-		neighbors.get(edge.u).remove(new Integer(edge.v));
-		return true;
-	}
-
-	/**
-	 * Given an undirected Graph G = (V, E) and an integer k, find an induced
-	 * subgraph H of G of maximum size such that all vertices of H have degree
-	 * >= k, if no such induced graph exists returns null
-	 */
-	public static <E> Graph<E> maxInducedSubgraph(Graph<E> edge, int k) {
-		if (edge.getSize() < k)
-			return null;
-
-		List<Edge> edges = new ArrayList<Edge>();
-		List<E> vertices = edge.getVertices();
-
-		// getting edges
-		for (int i = 0; i < edge.getSize(); i++) {
-			for (int j = 0; j < edge.getNeighbors(i).size(); j++) {
-				edges.add(new Edge(i, edge.getNeighbors(i).get(j)));
-			}
-		}
-
-		AbstractGraph<E> graph = new UnweightedGraph<E>(edges, vertices);
-
-		boolean changed = true;
-		while (changed) {
-			changed = false;
-			for (int i = 0; i < graph.getSize(); i++) {
-				if (graph.getNeighbors(i).size() < k) {
-					graph.remove(graph.getVertex(i));
-					i--;
-					changed = true;
-				}
-			}
-		}
-		if (graph.getSize() == 0)
-			return null;
-		return graph;
-	}
-
-	/** determines if graph is connected */
-	public boolean isConnected() {
-		if (getSize() < 2)
-			return true;
-		Tree tree = dfs(0);
-		return (tree.getNumberOfVerticesFound() == getSize());
-	}
 }
 
 class UnweightedGraph<V> extends AbstractGraph<V> {
+	private static final long serialVersionUID = 1L;
+
 	/** Construct a graph from edges and vertices stored in arrays */
 	public UnweightedGraph(int[][] edges, V[] vertices) {
 		super(edges, vertices);
@@ -1448,17 +814,6 @@ interface Graph<V> extends Serializable {
 	/** Obtain a breadth-first search tree */
 	public AbstractGraph<V>.Tree bfs(int v);
 
-	/**
-	 * Return a Hamiltonian path from the specified vertex Return null if the
-	 * graph does not contain a Hamiltonian path
-	 */
-	public java.util.List<Integer> getHamiltonianPath(V vertex);
-
-	/**
-	 * Return a Hamiltonian path from the specified vertex label Return null if
-	 * the graph does not contain a Hamiltonian path
-	 */
-	public java.util.List<Integer> getHamiltonianPath(int inexe);
 }
 
 class WeightedEdge extends AbstractGraph.Edge implements
@@ -1485,9 +840,5 @@ class WeightedEdge extends AbstractGraph.Edge implements
 	public boolean equals(Object o) {
 		WeightedEdge edge = (WeightedEdge) o;
 		return (edge.u == u && edge.v == v);
-	}
-
-	public int hashCode() {
-		return weight;
 	}
 }
