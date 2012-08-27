@@ -1,4 +1,5 @@
-/*This program uses multithreading to simulate process of finding sudoku solution. The simulation displays all the search steps.
+/*This program uses multithreading to simulate process of finding sudoku solution. 
+ *The simulation displays all the search steps.
  *User can specify delay time by entering delay in milliseconds in JTextField provided.
  *User can enter optional sudoku puzzle and by clicking Solve button can find solution for it.
  *This GUI application can work as stand alone or as JApplet.*/
