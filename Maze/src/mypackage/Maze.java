@@ -15,8 +15,9 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Maze extends JApplet {
+	private static final long serialVersionUID = 1L;
 	Cell[][] cell = new Cell[9][9];
-	java.util.ArrayList list = new java.util.ArrayList();
+	java.util.ArrayList<int[][]> list = new java.util.ArrayList<int[][]>();
 
 	public Maze() {
 		JPanel jpCenter = new JPanel(new GridLayout(9, 9));
@@ -195,6 +196,7 @@ public class Maze extends JApplet {
 	}
 
 	class Cell extends JPanel {
+		private static final long serialVersionUID = 1L;
 		boolean isMarked;
 		boolean isPath;
 		boolean ClickEnable = true;
